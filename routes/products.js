@@ -3,6 +3,8 @@ const {
   requireAdmin,
 } = require('../middleware/auth');
 
+const Product = require('../models/products');
+
 /** @module products */
 module.exports = (app, nextMain) => {
   /**
@@ -27,7 +29,42 @@ module.exports = (app, nextMain) => {
    * @code {200} si la autenticación es correcta
    * @code {401} si no hay cabecera de autenticación
    */
+  /*
   app.get('/products', requireAuth, (req, resp, next) => {
+    resp.send('prueba, me lees?');
+  });  */
+
+  async function getProducts(req, res, next) {
+    let product;
+    try {
+      product = await Product.findById(req.params.id);
+      if (product == null) {
+        return res.status(404).json({ message: 'Cannot find product' });
+      }
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+    res.product = product;
+    next();
+  }
+
+  app.get('/products', requireAuth, async (req, resp, next) => {
+    try {
+      const products = await Product.find(req.params.id);
+      resp.json(products);
+    } catch (err) {
+      resp.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get('/products/:id', getProducts, requireAuth, async (req, resp, next) => {
+    const { id } = req.params;
+    try {
+      const products = await Product.find({ _id: id });
+      resp.json(products);
+    } catch (err) {
+      resp.status(500).json({ message: err.message });
+    }
   });
 
   /**
@@ -47,9 +84,6 @@ module.exports = (app, nextMain) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {404} si el producto con `productId` indicado no existe
    */
-  app.get('/products/:productId', requireAuth, (req, resp, next) => {
-  });
-
   /**
    * @name POST /products
    * @description Crea un nuevo producto
@@ -72,7 +106,20 @@ module.exports = (app, nextMain) => {
    * @code {403} si no es admin
    * @code {404} si el producto con `productId` indicado no existe
    */
-  app.post('/products', requireAdmin, (req, resp, next) => {
+  /* app.post('/products', requireAdmin, (req, resp, next) => {
+  }); */
+
+  app.post('/products', requireAdmin, async (req, res) => {
+    const product = new Product({
+      name: req.body.name,
+      price: req.body.price,
+    });
+    try {
+      const newProduct = await product.save();
+      res.status(201).json(newProduct);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
   });
 
   /**
@@ -98,7 +145,23 @@ module.exports = (app, nextMain) => {
    * @code {403} si no es admin
    * @code {404} si el producto con `productId` indicado no existe
    */
-  app.put('/products/:productId', requireAdmin, (req, resp, next) => {
+  /*   app.put('/products/:productId', requireAdmin, (req, resp, next) => {
+  }); */
+
+  // Updating One
+  app.patch('/products/:id', getProducts, async (req, res) => {
+    if (req.body.name != null) {
+      res.product.name = req.body.name;
+    }
+    if (req.body.price != null) {
+      res.product.price = req.body.price;
+    }
+    try {
+      const updatedProduct = await res.product.save();
+      res.json(updatedProduct);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
   });
 
   /**
@@ -119,7 +182,16 @@ module.exports = (app, nextMain) => {
    * @code {403} si no es ni admin
    * @code {404} si el producto con `productId` indicado no existe
    */
-  app.delete('/products/:productId', requireAdmin, (req, resp, next) => {
+  /* app.delete('/products/:productId', requireAdmin, (req, resp, next) => {
+  }); */
+
+  app.delete('/products/:id', getProducts, async (req, res) => {
+    try {
+      await res.product.remove();
+      res.json({ message: 'Deleted Product' });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   });
 
   nextMain();
