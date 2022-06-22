@@ -5,6 +5,8 @@ const {
   requireAdmin,
 } = require('../middleware/auth');
 
+const User = require('../models/users');
+
 const {
   getUsers,
 } = require('../controller/users');
@@ -20,7 +22,6 @@ const initAdminUser = (app, next) => {
     password: bcrypt.hashSync(adminPassword, 10),
     roles: { admin: true },
   };
-
   // TODO: crear usuaria admin
   next();
 };
@@ -114,7 +115,21 @@ module.exports = (app, next) => {
    * @code {401} si no hay cabecera de autenticación
    * @code {403} si ya existe usuaria con ese `email`
    */
-  app.post('/users', requireAdmin, (req, resp, next) => {
+
+  app.post('/users', requireAdmin, async (req, res) => {
+    const jumps = await bcrypt.genSalt(10);
+    const user = new User({
+      user: req.body.user,
+      email: req.body.email,
+      password: await bcrypt.hash(req.body.password, jumps),
+      roles: req.body.roles,
+    });
+    try {
+      const newUser = await user.save();
+      res.status(201).json(newUser);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
   });
 
   /**

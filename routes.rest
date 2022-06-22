@@ -1,22 +1,26 @@
 GET http://localhost:8080/products
 
 ###
+
 GET http://localhost:8080/products/62a9f11425bcd409dc8dacec
 
 ###
 POST http://localhost:8080/products
 Content-Type: application/json
+
 {
-    "name": "Burger Baicon",
-     "price": 150
+    "name": "Burger Avocado",
+     "price": 200
 }
 
-###
-DELETE http://localhost:8080/products/62a9ee0d36df79ce83518e41
 
 ###
-PATCH http://localhost:8080/products/62a9f11425bcd409dc8dacec
+DELETE http://localhost:8080/products/62aa4eba3bf32dc23066ff8d
+
+###
+PATCH http://localhost:8080/products/62aa4eba3bf32dc23066ff8d
 Content-Type: application/json
+
 {
     "price": 200
 }

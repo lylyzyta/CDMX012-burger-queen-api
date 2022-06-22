@@ -3,4 +3,7 @@ secrets.env
 docs
 routes.rest
 config.js
+globalSetup.js
+docker-compose.ylm
+/e2e
 
