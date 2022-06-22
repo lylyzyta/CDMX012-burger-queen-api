@@ -1,0 +1,27 @@
+GET http://localhost:8080/users
+
+###
+
+GET http://localhost:8080/users
+
+###
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+    "user": "Boris",
+    "email": "boris@gmail.com",
+    "password": "123xmi",
+    "roles": "cook"
+}
+
+###
+DELETE http://localhost:8080/users/62aa4eba3bf32dc23066ff8d
+
+###
+PATCH http://localhost:8080/users/62aa4eba3bf32dc23066ff8d
+Content-Type: application/json
+
+{
+    "price": 200
+}
